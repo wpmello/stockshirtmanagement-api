@@ -1,32 +1,36 @@
-package com.digitalinnovationone.summershirts.entity;
+package com.digitalinnovationone.summershirts.dto;
 
 import com.digitalinnovationone.summershirts.enums.ShirtModel;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 
-@Entity
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Shirt {
+public class ShirtDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
+    @NotNull
     private String brand;
 
-    @Column(nullable = false)
+    @NotNull
+    @Max(100)
     private int max;
 
-    @Column(nullable = false)
+    @NotNull
+    @Max(2)
     private int quantity;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ShirtModel model;
 }
