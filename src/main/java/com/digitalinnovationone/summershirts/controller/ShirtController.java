@@ -15,7 +15,7 @@ import javax.validation.Valid;
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class ShirtController {
 
-    private final ShirtService shirtService;
+    private ShirtService shirtService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
