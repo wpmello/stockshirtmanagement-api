@@ -21,9 +21,20 @@ public class ShirtService {
         if (optSavedShirtModel.isPresent()) {
             throw new ShirtWithThisModelAlreadyRegisteredException(shirtDTO.getModel().getDescription());
         }
-        Shirt shirt = new Shirt(shirtDTO.getId(), shirtDTO.getBrand(), shirtDTO.getMax(), shirtDTO.getQuantity(), shirtDTO.getModel());
+        Shirt shirt = new Shirt(
+                shirtDTO.getId(),
+                shirtDTO.getBrand(),
+                shirtDTO.getMax(),
+                shirtDTO.getQuantity(),
+                shirtDTO.getModel());
+
         shirtRepository.save(shirt);
-        ShirtDTO shirtDTO1 = new ShirtDTO(shirt.getId(), shirtDTO.getBrand(), shirtDTO.getMax(), shirtDTO.getQuantity(), shirtDTO.getModel());
+
+        ShirtDTO shirtDTO1 = new ShirtDTO(
+                shirt.getId(), shirtDTO.getBrand(),
+                shirtDTO.getMax(),
+                shirtDTO.getQuantity(),
+                shirtDTO.getModel());
         return shirtDTO1;
     }
 }
