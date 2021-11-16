@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/api/v1/shirts")
@@ -30,4 +31,8 @@ public class ShirtController {
         return shirtService.findByModel(model);
     }
 
+    @GetMapping
+    public List<ShirtDTO> listAll() {
+        return shirtService.listAll();
+    }
 }
