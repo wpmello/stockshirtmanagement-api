@@ -1,6 +1,8 @@
 package com.digitalinnovationone.summershirts.controller;
 
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
+import com.digitalinnovationone.summershirts.enums.ShirtModel;
+import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.service.ShirtService;
 import lombok.AllArgsConstructor;
@@ -21,6 +23,11 @@ public class ShirtController {
     @ResponseStatus(HttpStatus.CREATED)
     public ShirtDTO createShirt(@RequestBody @Valid ShirtDTO shirtDTO) throws ShirtWithThisModelAlreadyRegisteredException {
         return shirtService.createShirt(shirtDTO);
+    }
+
+    @GetMapping("/{model}")
+    public ShirtDTO findByModel(@PathVariable ShirtModel model) throws ShirtNotFoundException {
+        return shirtService.findByModel(model);
     }
 
 }
