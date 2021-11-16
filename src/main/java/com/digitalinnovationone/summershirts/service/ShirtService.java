@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
@@ -34,8 +36,16 @@ public class ShirtService {
 
     }
 
+    public List<ShirtDTO> listAll() {
+        return shirtRepository.findAll()
+                .stream()
+                .map(ShirtService::toDTO)
+                .collect(Collectors.toList());
+    }
+
     // it's simplification of the method -instance a dto from an entity-
-    private ShirtDTO toDTO(Shirt shirt) {
+    // I had to make it static because I've been need to use a reference method in the 'listAll' method
+    private static ShirtDTO toDTO(Shirt shirt) {
         ShirtDTO shirtDTO = new ShirtDTO(
                 shirt.getId(),
                 shirt.getBrand(),

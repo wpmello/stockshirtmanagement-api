@@ -12,11 +12,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
+import static java.util.Collections.singletonList;
 import static java.util.Optional.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,5 +74,27 @@ public class ShirtServiceTest {
         when(shirtRepository.findByModel(expectedShirDTO.getModel())).thenReturn(Optional.empty()); // return an empty search
 
         assertThrows(ShirtNotFoundException.class, () -> shirtService.findByModel(expectedShirDTO.getModel())); // verifying if the exception is being throwing
+    }
+
+    @Test
+    void whenListShirtIsCalledThenReturnAListOfShirts() {
+        ShirtDTO expectedShirtDTO = shirtDTO; // You also can use the variables that be in the start of the code if you don't want to instance it again like I do
+        Shirt expectedFoundShirt = shirt;
+
+        when(shirtRepository.findAll()).thenReturn(singletonList(expectedFoundShirt));
+
+        List<ShirtDTO> foundsShirtDTO = shirtService.listAll();
+
+        assertFalse(foundsShirtDTO.isEmpty());
+        assertEquals(expectedShirtDTO, foundsShirtDTO.get(0));
+    }
+
+    @Test
+    void whenListIsCalledThenReturnAnEmptyList() {
+        when(shirtRepository.findAll()).thenReturn(Collections.EMPTY_LIST);
+
+        List<ShirtDTO> listDTO = shirtService.listAll();
+
+        assertTrue(listDTO.isEmpty());
     }
 }
