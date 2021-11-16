@@ -43,6 +43,11 @@ public class ShirtService {
                 .collect(Collectors.toList());
     }
 
+    public void deleteById(Long id) throws ShirtNotFoundException {
+        verifyIfExist(id);
+        shirtRepository.deleteById(id);
+    }
+
     // it's simplification of the method -instance a dto from an entity-
     // I had to make it static because I've been need to use a reference method in the 'listAll' method
     private static ShirtDTO toDTO(Shirt shirt) {
@@ -72,5 +77,10 @@ public class ShirtService {
         if (optSavedShirtModel.isPresent()) {
             throw new ShirtWithThisModelAlreadyRegisteredException(shirtDTO.getModel().getDescription());
         }
+    }
+
+    // Finding by id method
+    private void verifyIfExist(Long id) throws ShirtNotFoundException {
+        shirtRepository.findById(id).orElseThrow(() -> new ShirtNotFoundException(id));
     }
 }

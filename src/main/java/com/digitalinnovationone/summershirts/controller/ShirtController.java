@@ -35,4 +35,10 @@ public class ShirtController {
     public List<ShirtDTO> listAll() {
         return shirtService.listAll();
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable Long id) throws ShirtNotFoundException {
+        shirtService.deleteById(id);
+    }
 }

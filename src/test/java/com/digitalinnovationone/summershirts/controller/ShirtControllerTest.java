@@ -20,9 +20,8 @@ import java.util.Collections;
 
 import static com.digitalinnovationone.summershirts.utils.JsonConvertion.asJsonString;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -30,6 +29,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ShirtControllerTest {
 
     private static final String SHIRT_API_URL_PATH = "/api/v1/shirts";
+    private static final long VALID_SHIRT_ID = 1L;
+    private static final long INVALID_SHIRT_ID = 2L;
 
     // It was made this way because I can't use 'MapStruct' or 'ModelMapper' for the conversion of the objects
     ShirtDTO shirtDTO = ShirtDTOBuilder.builder().build().toShirtDTO();
@@ -116,4 +117,23 @@ class ShirtControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void whenDELETEIsCalledWithValidIdThenNoContentStatusIsReturned() throws Exception {
+        doNothing().when(shirtService).deleteById(VALID_SHIRT_ID);
+
+        mockMvc.perform(delete(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        verify(shirtService, times(1)).deleteById(VALID_SHIRT_ID);
+    }
+
+    @Test
+    void whenDELETEIsCalledWithInvalidIdThenExceptionIsThrown() throws Exception {
+        doThrow(ShirtNotFoundException.class).when(shirtService).deleteById(INVALID_SHIRT_ID);
+
+        mockMvc.perform(delete(SHIRT_API_URL_PATH + "/" + INVALID_SHIRT_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 }
