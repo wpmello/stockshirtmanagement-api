@@ -9,4 +9,8 @@ public class ShirtNotFoundException extends Exception {
     public ShirtNotFoundException(ShirtModel model) {
         super(String.format("Shirt with model %s not found in the system.", model));
     }
+
+    public ShirtNotFoundException(Long id) {
+        super(String.format("Shirt with id %d not found in system.", id));
+    }
 }

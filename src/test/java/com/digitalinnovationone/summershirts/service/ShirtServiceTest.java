@@ -19,10 +19,12 @@ import java.util.Optional;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ShirtServiceTest {
+
+    private static final long INVALID_SHIRT_ID = 1L;
 
     @Mock
     private ShirtRepository shirtRepository;
@@ -96,5 +98,26 @@ public class ShirtServiceTest {
         List<ShirtDTO> listDTO = shirtService.listAll();
 
         assertTrue(listDTO.isEmpty());
+    }
+
+    @Test
+    void whenDeleteIsCalledWithValidIdThenAShirtShouldBeDeleted() throws ShirtNotFoundException {
+        ShirtDTO expectedDeletedShirtDTO = shirtDTO;
+        Shirt expectedDeletedShirt = shirt;
+
+        when(shirtRepository.findById(expectedDeletedShirtDTO.getId())).thenReturn(Optional.of(expectedDeletedShirt));
+        doNothing().when(shirtRepository).deleteById(expectedDeletedShirt.getId());
+
+        shirtService.deleteById(expectedDeletedShirtDTO.getId());
+
+        verify(shirtRepository, times(1)).findById(expectedDeletedShirtDTO.getId()); // it verifies how many times the method was called
+        verify(shirtRepository, times(1)).deleteById(expectedDeletedShirt.getId()); // it verifies how many times the method was called
+    }
+
+    @Test
+    void whenDeleteIsCalledWithInvalidIdThenExceptionShouldBeThrown() {
+        when(shirtRepository.findById(INVALID_SHIRT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ShirtNotFoundException.class, () -> shirtService.deleteById(INVALID_SHIRT_ID));
     }
 }
