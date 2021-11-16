@@ -1,11 +1,10 @@
-package com.digitalinnovationone.summershirts.ShirtService;
+package com.digitalinnovationone.summershirts.service;
 
 import com.digitalinnovationone.summershirts.builder.ShirtDTOBuilder;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.entity.Shirt;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.repository.ShirtRepository;
-import com.digitalinnovationone.summershirts.service.ShirtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +26,7 @@ public class ShirtServiceTest {
     @InjectMocks
     private ShirtService shirtService;
 
-    // It's made this way because I can't use 'MapStruct' or 'ModelMapper' to do the conversion of the objects
+    // It was made this way because I can't use 'MapStruct' or 'ModelMapper' to do the conversion of the objects
     private Shirt shirt;
     private ShirtDTO shirtDTO;
 
