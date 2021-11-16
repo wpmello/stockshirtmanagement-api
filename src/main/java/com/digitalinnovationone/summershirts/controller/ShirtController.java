@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/shirts")
+@RequestMapping(value = "/api/v1/shirts")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 public class ShirtController {
 
@@ -22,4 +22,5 @@ public class ShirtController {
     public ShirtDTO createShirt(@RequestBody @Valid ShirtDTO shirtDTO) throws ShirtWithThisModelAlreadyRegisteredException {
         return shirtService.createShirt(shirtDTO);
     }
+
 }

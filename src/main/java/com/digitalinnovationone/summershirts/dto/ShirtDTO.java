@@ -24,11 +24,11 @@ public class ShirtDTO {
 
     @NotNull
     @Max(100)
-    private int max;
+    private Integer max;
 
     @NotNull
-    @Max(2)
-    private int quantity;
+    @Max(100)
+    private Integer quantity;
 
     @NotNull
     @Enumerated(EnumType.STRING)
