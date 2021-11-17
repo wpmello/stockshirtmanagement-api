@@ -51,12 +51,14 @@ public class ShirtService {
 
     public ShirtDTO increment(Long id, int quantityToIncrement) throws ShirtNotFoundException, ShirtStockExceededException {
         Shirt shirtToIncrement = verifyIfExist(id);
-        int shirtStockAfterIncrement = quantityToIncrement + shirtToIncrement.getQuantity();
-        if (shirtStockAfterIncrement <= shirtToIncrement.getMax()) {
-            shirtToIncrement.setQuantity(shirtStockAfterIncrement);
-            return toDTO(shirtToIncrement);
+        int quantityAfterIncrement = shirtToIncrement.getQuantity() + quantityToIncrement;
+        if (quantityAfterIncrement <= shirtToIncrement.getMax()) {
+            shirtToIncrement.setQuantity(shirtToIncrement.getQuantity() + quantityToIncrement);
+            Shirt incrementedShirtStock = shirtRepository.save(shirtToIncrement);
+            return toDTO(incrementedShirtStock);
+        } else {
+            throw new ShirtStockExceededException(id, quantityToIncrement);
         }
-        throw new ShirtStockExceededException(id, quantityToIncrement);
     }
 
     // it's simplification of the method -instance a dto from an entity-

@@ -131,6 +131,7 @@ public class ShirtServiceTest {
         Shirt expectedShirt = shirt;
 
         when(shirtRepository.findById(expectedShirtDTO.getId())).thenReturn(Optional.of(expectedShirt));
+        when(shirtRepository.save(expectedShirt)).thenReturn(expectedShirt);
 
         int quantityToIncrement = 90;
         int expectedQuantityAfterIncrement = expectedShirtDTO.getQuantity() + quantityToIncrement;
