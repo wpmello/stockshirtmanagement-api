@@ -4,7 +4,8 @@ import com.digitalinnovationone.summershirts.builder.ShirtDTOBuilder;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.entity.Shirt;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
-import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockDecrementExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockIncrementExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.repository.ShirtRepository;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,7 @@ import java.util.Optional;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -126,7 +126,7 @@ public class ShirtServiceTest {
     }
 
     @Test
-    void whenIncrementWithValidIdIsCalledThenIncrementShirtStock() throws ShirtNotFoundException, ShirtStockExceededException {
+    void whenIncrementWithValidIdIsCalledThenIncrementShirtStock() throws ShirtNotFoundException, ShirtStockIncrementExceededException {
         ShirtDTO expectedShirtDTO = shirtDTO;
         Shirt expectedShirt = shirt;
 
@@ -149,7 +149,7 @@ public class ShirtServiceTest {
         when(shirtRepository.findById(expectedShirtDTO.getId())).thenReturn(Optional.of(expectedShirt));
 
         int quantityToIncrement = 101;
-        assertThrows(ShirtStockExceededException.class, () -> shirtService.increment(expectedShirtDTO.getId(), quantityToIncrement));
+        assertThrows(ShirtStockIncrementExceededException.class, () -> shirtService.increment(expectedShirtDTO.getId(), quantityToIncrement));
     }
 
     @Test
@@ -159,5 +159,57 @@ public class ShirtServiceTest {
         when(shirtRepository.findById(INVALID_SHIRT_ID)).thenReturn(Optional.empty());
 
         assertThrows(ShirtNotFoundException.class, () -> shirtService.increment(INVALID_SHIRT_ID, quantityToIncrement));
+    }
+
+    @Test
+    void whenDecrementIsCalledThenDecrementShirtStock() throws ShirtNotFoundException, ShirtStockDecrementExceededException {
+        ShirtDTO expectedShitDTO = shirtDTO;
+        Shirt expectedShit = shirt;
+
+        when(shirtRepository.findById(expectedShitDTO.getId())).thenReturn(Optional.of(expectedShit));
+        when(shirtRepository.save(expectedShit)).thenReturn(expectedShit);
+
+        int quantityToDecrement = 2;
+        int expectedQuantityAfterDecrement = expectedShitDTO.getQuantity() - quantityToDecrement;
+        ShirtDTO decrementedShitDTO = shirtService.decrement(expectedShitDTO.getId(), quantityToDecrement);
+
+        assertThat(expectedQuantityAfterDecrement, equalTo(decrementedShitDTO.getQuantity()));
+        assertThat(decrementedShitDTO.getQuantity(), greaterThan(0));
+    }
+
+    @Test
+    void whenDecrementIsCalledToEmptyStockThenEmptyShirtStock() throws ShirtNotFoundException, ShirtStockDecrementExceededException {
+        ShirtDTO expectedShitDTO = shirtDTO;
+        Shirt expectedShit = shirt;
+
+        when(shirtRepository.findById(expectedShitDTO.getId())).thenReturn(Optional.of(expectedShit));
+        when(shirtRepository.save(expectedShit)).thenReturn(expectedShit);
+
+        int quantityToDecrement = 10;
+        int expectedQuantityAfterDecrement = expectedShit.getQuantity() - quantityToDecrement;
+        ShirtDTO decrementedShitDTO = shirtService.decrement(shirtDTO.getId(), quantityToDecrement);
+
+        assertThat(expectedQuantityAfterDecrement, equalTo(0));
+        assertThat(expectedQuantityAfterDecrement, equalTo(decrementedShitDTO.getQuantity()));
+    }
+
+    @Test
+    void whenDecrementIsLowerThanZeroThenThrowException() {
+        ShirtDTO expectedShitDTO = shirtDTO;
+        Shirt expectedShit = shirt;
+
+        when(shirtRepository.findById(expectedShitDTO.getId())).thenReturn(Optional.of(expectedShit));
+
+        int quantityToDecrement = 80;
+        assertThrows(ShirtStockDecrementExceededException.class, () -> shirtService.decrement(shirtDTO.getId(), quantityToDecrement));
+    }
+
+    @Test
+    void whenDecrementIsCalledWithInvalidIdThenThrowException() {
+        int quantityToDecrement = 101;
+
+        when(shirtRepository.findById(INVALID_SHIRT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ShirtNotFoundException.class, () -> shirtService.decrement(INVALID_SHIRT_ID, quantityToDecrement));
     }
 }

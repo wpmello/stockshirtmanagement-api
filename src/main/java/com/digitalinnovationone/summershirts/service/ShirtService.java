@@ -4,7 +4,8 @@ import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.entity.Shirt;
 import com.digitalinnovationone.summershirts.enums.ShirtModel;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
-import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockDecrementExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockIncrementExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.repository.ShirtRepository;
 import lombok.AllArgsConstructor;
@@ -49,7 +50,7 @@ public class ShirtService {
         shirtRepository.deleteById(id);
     }
 
-    public ShirtDTO increment(Long id, int quantityToIncrement) throws ShirtNotFoundException, ShirtStockExceededException {
+    public ShirtDTO increment(Long id, int quantityToIncrement) throws ShirtNotFoundException, ShirtStockIncrementExceededException {
         Shirt shirtToIncrement = verifyIfExist(id);
         int quantityAfterIncrement = shirtToIncrement.getQuantity() + quantityToIncrement;
         if (quantityAfterIncrement <= shirtToIncrement.getMax()) {
@@ -57,8 +58,19 @@ public class ShirtService {
             Shirt incrementedShirtStock = shirtRepository.save(shirtToIncrement);
             return toDTO(incrementedShirtStock);
         } else {
-            throw new ShirtStockExceededException(id, quantityToIncrement);
+            throw new ShirtStockIncrementExceededException(id, quantityToIncrement);
         }
+    }
+
+    public ShirtDTO decrement(Long id, int quantityToDecrement) throws ShirtNotFoundException, ShirtStockDecrementExceededException {
+        Shirt shirtToDecrement = verifyIfExist(id);
+        int expectedQuantityAfterDecrement = shirtToDecrement.getQuantity() - quantityToDecrement;
+        if (expectedQuantityAfterDecrement >= 0) {
+            shirtToDecrement.setQuantity(expectedQuantityAfterDecrement);
+            Shirt decrementedShirtQuantity = shirtRepository.save(shirtToDecrement);
+            return toDTO(decrementedShirtQuantity);
+        }
+        throw new ShirtStockDecrementExceededException(id, quantityToDecrement);
     }
 
     // it's simplification of the method -instance a dto from an entity-
