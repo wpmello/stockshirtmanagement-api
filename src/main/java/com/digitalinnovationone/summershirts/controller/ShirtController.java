@@ -4,7 +4,7 @@ import com.digitalinnovationone.summershirts.dto.QuantityDTO;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.enums.ShirtModel;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
-import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockIncrementExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.service.ShirtService;
 import lombok.AllArgsConstructor;
@@ -45,7 +45,7 @@ public class ShirtController {
     }
 
     @PatchMapping("/{id}/increment")
-    public ShirtDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws ShirtNotFoundException, ShirtStockExceededException {
+    public ShirtDTO increment(@PathVariable Long id, @RequestBody @Valid QuantityDTO quantityDTO) throws ShirtNotFoundException, ShirtStockIncrementExceededException {
         return shirtService.increment(id, quantityDTO.getQuantity());
     }
 }

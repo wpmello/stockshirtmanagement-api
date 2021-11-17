@@ -4,7 +4,7 @@ import com.digitalinnovationone.summershirts.builder.ShirtDTOBuilder;
 import com.digitalinnovationone.summershirts.dto.QuantityDTO;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
-import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockIncrementExceededException;
 import com.digitalinnovationone.summershirts.service.ShirtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,7 +142,7 @@ class ShirtControllerTest {
 
 
     @Test
-    void whenPATCHIsCalledToIncrementDiscountThenOkStatusIsReturned() throws Exception, ShirtStockExceededException {
+    void whenPATCHIsCalledToIncrementDiscountThenOkStatusIsReturned() throws Exception, ShirtStockIncrementExceededException {
         shirtDTO.setQuantity(shirtDTO.getQuantity() + quantityDTO.getQuantity());
 
         when(shirtService.increment(VALID_SHIRT_ID, quantityDTO.getQuantity())).thenReturn(shirtDTO);
@@ -157,7 +157,7 @@ class ShirtControllerTest {
 
     @Test
     void whenPATCHIsCalledToIncrementGreaterThanMaxThenBadRequestStatusIsReturned() throws Exception {
-        when(shirtService.increment(shirtDTO.getId(), quantityDTO.getQuantity())).thenThrow(ShirtStockExceededException.class);
+        when(shirtService.increment(shirtDTO.getId(), quantityDTO.getQuantity())).thenThrow(ShirtStockIncrementExceededException.class);
 
         mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + "/increment")
                         .contentType(MediaType.APPLICATION_JSON)
