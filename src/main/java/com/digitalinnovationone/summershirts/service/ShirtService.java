@@ -4,6 +4,7 @@ import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.entity.Shirt;
 import com.digitalinnovationone.summershirts.enums.ShirtModel;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.repository.ShirtRepository;
 import lombok.AllArgsConstructor;
@@ -48,6 +49,16 @@ public class ShirtService {
         shirtRepository.deleteById(id);
     }
 
+    public ShirtDTO increment(Long id, int quantityToIncrement) throws ShirtNotFoundException, ShirtStockExceededException {
+        Shirt shirtToIncrement = verifyIfExist(id);
+        int shirtStockAfterIncrement = quantityToIncrement + shirtToIncrement.getQuantity();
+        if (shirtStockAfterIncrement <= shirtToIncrement.getMax()) {
+            shirtToIncrement.setQuantity(shirtStockAfterIncrement);
+            return toDTO(shirtToIncrement);
+        }
+        throw new ShirtStockExceededException(id, quantityToIncrement);
+    }
+
     // it's simplification of the method -instance a dto from an entity-
     // I had to make it static because I've been need to use a reference method in the 'listAll' method
     private static ShirtDTO toDTO(Shirt shirt) {
@@ -80,7 +91,7 @@ public class ShirtService {
     }
 
     // Finding by id method
-    private void verifyIfExist(Long id) throws ShirtNotFoundException {
-        shirtRepository.findById(id).orElseThrow(() -> new ShirtNotFoundException(id));
+    private Shirt verifyIfExist(Long id) throws ShirtNotFoundException {
+        return shirtRepository.findById(id).orElseThrow(() -> new ShirtNotFoundException(id));
     }
 }
