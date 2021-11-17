@@ -4,6 +4,7 @@ import com.digitalinnovationone.summershirts.builder.ShirtDTOBuilder;
 import com.digitalinnovationone.summershirts.dto.QuantityDTO;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockDecrementExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtStockIncrementExceededException;
 import com.digitalinnovationone.summershirts.service.ShirtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,6 +34,9 @@ class ShirtControllerTest {
     private static final String SHIRT_API_URL_PATH = "/api/v1/shirts";
     private static final long VALID_SHIRT_ID = 1L;
     private static final long INVALID_SHIRT_ID = 2L;
+    private static final String SHIRT_API_SUBPATH_INCREMENT_URL = "/increment";
+    private static final String SHIRT_API_SUBPATH_DECREMENT_URL = "/decrement";
+
 
     // It was made this way because I can't use 'MapStruct' or 'ModelMapper' for the conversion of the objects
     ShirtDTO shirtDTO = ShirtDTOBuilder.builder().build().toShirtDTO();
@@ -147,7 +151,7 @@ class ShirtControllerTest {
 
         when(shirtService.increment(VALID_SHIRT_ID, quantityDTO.getQuantity())).thenReturn(shirtDTO);
 
-        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + "/increment")
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + SHIRT_API_SUBPATH_INCREMENT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(quantityDTO)))
                 .andExpect(status().isOk())
@@ -159,19 +163,50 @@ class ShirtControllerTest {
     void whenPATCHIsCalledToIncrementGreaterThanMaxThenBadRequestStatusIsReturned() throws Exception {
         when(shirtService.increment(shirtDTO.getId(), quantityDTO.getQuantity())).thenThrow(ShirtStockIncrementExceededException.class);
 
-        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + "/increment")
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + SHIRT_API_SUBPATH_INCREMENT_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(quantityDTO)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void whenPATCHIsCalledWithInvalidToIncrementThenNotFoundIsReturned() throws Exception {
+    void whenPATCHIsCalledToIncrementWithInvalidThenNotFoundIsReturned() throws Exception {
         when(shirtService.increment(INVALID_SHIRT_ID, quantityDTO.getQuantity())).thenThrow(ShirtNotFoundException.class);
 
-        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + INVALID_SHIRT_ID + "/increment")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(quantityDTO)))
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + INVALID_SHIRT_ID + SHIRT_API_SUBPATH_INCREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(quantityDTO)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void whenPATCHIsCalledToDecrementDiscountThenOkStatusIsReturned() throws Exception {
+        when(shirtService.decrement(VALID_SHIRT_ID, quantityDTO.getQuantity())).thenReturn(shirtDTO);
+
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + SHIRT_API_SUBPATH_DECREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(quantityDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.model", is(shirtDTO.getModel().toString())));
+    }
+
+    @Test
+    void whenPATCHIsCalledToDecrementLowerThanZeroThenBadRequestIsReturned() throws Exception {
+        when(shirtService.decrement(VALID_SHIRT_ID, shirtDTO.getQuantity())).thenThrow(ShirtStockDecrementExceededException.class);
+
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + VALID_SHIRT_ID + SHIRT_API_SUBPATH_DECREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(quantityDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenPATCHIsCalledWithInvalidIdToDecrementTheNotFoundStatusIsReturned() throws Exception {
+        when(shirtService.decrement(INVALID_SHIRT_ID, shirtDTO.getQuantity())).thenThrow(ShirtNotFoundException.class);
+
+        mockMvc.perform(patch(SHIRT_API_URL_PATH + "/" + INVALID_SHIRT_ID + SHIRT_API_SUBPATH_DECREMENT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(quantityDTO)))
                 .andExpect(status().isNotFound());
     }
 }
