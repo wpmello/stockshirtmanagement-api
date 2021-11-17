@@ -27,7 +27,7 @@ public class ShirtDTO {
     private Integer max;
 
     @NotNull
-    @Max(100)
+    @Max(10)
     private Integer quantity;
 
     @NotNull

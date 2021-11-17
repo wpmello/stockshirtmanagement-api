@@ -4,6 +4,7 @@ import com.digitalinnovationone.summershirts.builder.ShirtDTOBuilder;
 import com.digitalinnovationone.summershirts.dto.ShirtDTO;
 import com.digitalinnovationone.summershirts.entity.Shirt;
 import com.digitalinnovationone.summershirts.exception.ShirtNotFoundException;
+import com.digitalinnovationone.summershirts.exception.ShirtStockExceededException;
 import com.digitalinnovationone.summershirts.exception.ShirtWithThisModelAlreadyRegisteredException;
 import com.digitalinnovationone.summershirts.repository.ShirtRepository;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Collections.singletonList;
-import static java.util.Optional.*;
+import static java.util.Optional.of;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +44,7 @@ public class ShirtServiceTest {
     void whenNewShirtInformedThenShouldBeCreated() throws ShirtWithThisModelAlreadyRegisteredException {
         Shirt expectedSavedShirt = shirt;
 
-        when(shirtRepository.findByModel(shirtDTO.getModel())).thenReturn(empty()); //testing if the exception is being throwing
+        when(shirtRepository.findByModel(shirtDTO.getModel())).thenReturn(Optional.empty()); //testing if the exception is being throwing
         when(shirtRepository.save(expectedSavedShirt)).thenReturn(expectedSavedShirt); // testing if the object is being saved
 
         ShirtDTO createdShirtDTO = shirtService.createShirt(shirtDTO);
@@ -119,5 +123,40 @@ public class ShirtServiceTest {
         when(shirtRepository.findById(INVALID_SHIRT_ID)).thenReturn(Optional.empty());
 
         assertThrows(ShirtNotFoundException.class, () -> shirtService.deleteById(INVALID_SHIRT_ID));
+    }
+
+    @Test
+    void whenIncrementWithValidIdIsCalledThenIncrementShirtStock() throws ShirtNotFoundException, ShirtStockExceededException {
+        ShirtDTO expectedShirtDTO = shirtDTO;
+        Shirt expectedShirt = shirt;
+
+        when(shirtRepository.findById(expectedShirtDTO.getId())).thenReturn(Optional.of(expectedShirt));
+
+        int quantityToIncrement = 90;
+        int expectedQuantityAfterIncrement = expectedShirtDTO.getQuantity() + quantityToIncrement;
+        ShirtDTO incrementedShirDTO = shirtService.increment(expectedShirtDTO.getId(), quantityToIncrement);
+
+        assertThat(expectedQuantityAfterIncrement, equalTo(incrementedShirDTO.getQuantity())); // with hamcrest here I'm testing if quantity from A is equal quantity from B
+        assertThat(expectedQuantityAfterIncrement, lessThanOrEqualTo(expectedShirtDTO.getMax())); // here is testing if max quantity from entity is equal or less increment quantity
+    }
+
+    @Test
+    void whenIncrementIsGreaterThanMaxThenThrowException() {
+        ShirtDTO expectedShirtDTO = shirtDTO;
+        Shirt expectedShirt = shirt;
+
+        when(shirtRepository.findById(expectedShirtDTO.getId())).thenReturn(Optional.of(expectedShirt));
+
+        int quantityToIncrement = 101;
+        assertThrows(ShirtStockExceededException.class, () -> shirtService.increment(expectedShirtDTO.getId(), quantityToIncrement));
+    }
+
+    @Test
+    void whenIncrementIsCalledWithInvalidIdThenThrowException() {
+        int quantityToIncrement = 10;
+
+        when(shirtRepository.findById(INVALID_SHIRT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ShirtNotFoundException.class, () -> shirtService.increment(INVALID_SHIRT_ID, quantityToIncrement));
     }
 }

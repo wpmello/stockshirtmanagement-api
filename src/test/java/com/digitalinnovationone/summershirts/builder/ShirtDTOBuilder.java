@@ -21,7 +21,7 @@ public class ShirtDTOBuilder {
     private int max = 100;
 
     @Builder.Default
-    private int quantity = 100;
+    private int quantity = 10;
 
     @Builder.Default
     private ShirtModel model = ShirtModel.TOUR;
