@@ -19,7 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/v1/shirts")
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-public class ShirtController {
+public class ShirtController implements ShirtControllerDocs{
 
     private ShirtService shirtService;
 
